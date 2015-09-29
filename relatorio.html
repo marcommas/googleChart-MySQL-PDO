@@ -1,0 +1,85 @@
+<!DOCTYPE HTML>
+
+<html lang="pt-br">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	
+		<!-- JSAPI é a biblioteca do google charts, necessário utilizar o jQuery junto -->
+		<script type="text/javascript" charset="iso-8859-1" src="js/jsapi.js"></script>
+		<script type="text/javascript" charset="iso-8859-1" src="js/jquery-1.7.1.min.js"></script>
+		<script>window.jQuery || document.write('<script src="js/jquery-1.7.1.min.js"><\/script>')</script>
+
+	</head>
+
+	<body>
+			<form id="formulario" name="formulario" action="relatorio.php" method="post" enctype="multipart/form-data" >
+				<div class='btn-group'>
+					<input type='submit' name='consultar' id='consultar' value='Consultar' onclick='f_grafico();' />
+				</div>
+			</form>
+
+			<div id="area_grafico"></div>
+
+
+		<script type="text/javascript">
+			//Carregar a API de visualizacao e os pacotes necessarios.
+			google.load('visualization', '1.0', {'packages':['corechart']});
+			
+			//Caso necessário é possível passar parâmetro pela função
+			function f_grafico()
+			{
+				//Envia os dados por ajax para ser criado um arquivo JSON  de retorno
+				var jsonData = $.ajax({
+					//Crio um arquivo php que criará o arquivo JSON,
+					//Se necessário passe os parâmetros por GET
+					url: "json/gera_grafico.php",
+					dataType: "json",
+					async:false
+
+					}).responseText;
+
+				//Mais opções de configuração no manual de desenvolvedor da googleCharts
+				var options = {
+					width:'100%',
+					height:'100px',
+
+					//tras valores nulos
+					sliceVisibilityThreshold:0,
+					hAxis: {format: 'decimal'},
+					bar: {groupWidth: "80%"},
+	        		legend: { position: "none" },
+	        		isStacked: 'absolute',
+	        		
+	        		annotations: {
+						textStyle: {
+							//fontName: 'Times-Roman',
+							fontSize: 18,
+							color: 'black',
+							bold: false,
+						}  
+					}
+				};
+
+				//Arquivo de retor jsonData 
+				var data = new google.visualization.DataTable(jsonData);
+
+				//Desenha o gráfico de barras no local area_grafico
+				var chart = new google.visualization.BarChart(document.getElementById('area_grafico'));
+
+				//Monta o gráfico
+				chart.draw(data, options);
+				
+				//Se diminuida a tela o gráfico se adequa ao tamanho da tela
+				$(window).resize(function(){
+		            chart.draw(data, options);
+		        });
+				
+			}
+   
+
+		</script>
+
+
+	</body>
+</html>
